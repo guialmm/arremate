@@ -43,7 +43,8 @@ def make_pdf(pages: list[str]) -> bytes:
         objs.append(f"<< /Length {len(ops)} >>\nstream\n{ops}\nendstream".encode())
     objs.append(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")
 
-    out = io.BytesIO(b"%PDF-1.4\n")
+    out = io.BytesIO()
+    out.write(b"%PDF-1.4\n")
     offsets = []
     for n, obj in enumerate(objs, start=1):
         offsets.append(out.tell())
