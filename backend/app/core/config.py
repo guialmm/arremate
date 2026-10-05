@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     # Editais above this are almost always scanned annexes or drawings.
     max_document_mb: int = 40
 
+    # LLM (Gemini free tier; models tried in order when one is overloaded)
+    gemini_api_key: str = ""
+    gemini_modelos: list[str] = ["gemini-3.7-flash", "gemini-flash-latest"]
+
     @field_validator("database_url")
     @classmethod
     def _asyncpg_url(cls, url: str) -> str:
