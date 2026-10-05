@@ -16,7 +16,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base, TimestampMixin
@@ -186,3 +186,37 @@ class Sincronizacao(Base):
     atualizada_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.now, onupdate=datetime.now
     )
+
+
+class Perfil(TimestampMixin, Base):
+    """What a company sells, where, and which qualification papers it already holds."""
+
+    __tablename__ = "perfis"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(200))
+    descricao: Mapped[str] = mapped_column(Text)
+    # Searched with Portuguese stemming: "caneta" also finds "canetas".
+    palavras_chave: Mapped[list[str]] = mapped_column(ARRAY(String(100)))
+    ufs: Mapped[list[str]] = mapped_column(ARRAY(String(2)), default=list)  # empty = Brazil
+    valor_minimo: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
+    valor_maximo: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
+    # Certidões, atestados, balanço... compared against the edital's requirements.
+    documentos: Mapped[list[str]] = mapped_column(JSONB, default=list)
+
+
+class Triagem(TimestampMixin, Base):
+    """First pass over a tender's summary: is it worth reading the edital?"""
+
+    __tablename__ = "triagens"
+    __table_args__ = (UniqueConstraint("perfil_id", "licitacao_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    perfil_id: Mapped[int] = mapped_column(ForeignKey("perfis.id", ondelete="CASCADE"), index=True)
+    licitacao_id: Mapped[str] = mapped_column(ForeignKey("licitacoes.id", ondelete="CASCADE"))
+    nota: Mapped[int] = mapped_column(Integer)  # 0-100
+    relevante: Mapped[bool]
+    motivo: Mapped[str] = mapped_column(Text)
+    modelo: Mapped[str] = mapped_column(String(60))
+
+    licitacao: Mapped[Licitacao] = relationship()
