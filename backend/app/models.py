@@ -220,3 +220,27 @@ class Triagem(TimestampMixin, Base):
     modelo: Mapped[str] = mapped_column(String(60))
 
     licitacao: Mapped[Licitacao] = relationship()
+
+
+class AnaliseEdital(TimestampMixin, Base):
+    """The model's reading of a tender's editais for one profile, with every
+    citation already checked against the stored page text."""
+
+    __tablename__ = "analises"
+    __table_args__ = (UniqueConstraint("perfil_id", "licitacao_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    perfil_id: Mapped[int] = mapped_column(ForeignKey("perfis.id", ondelete="CASCADE"), index=True)
+    licitacao_id: Mapped[str] = mapped_column(ForeignKey("licitacoes.id", ondelete="CASCADE"))
+    # app.analise.schemas.Analise, each citation enriched with its verification.
+    resultado: Mapped[dict] = mapped_column(JSONB)
+    recomendacao: Mapped[str] = mapped_column(String(20))
+    modelo: Mapped[str] = mapped_column(String(60))
+    paginas_lidas: Mapped[int] = mapped_column(Integer)
+    tokens_entrada: Mapped[int] = mapped_column(Integer)
+    tokens_saida: Mapped[int] = mapped_column(Integer)
+    segundos: Mapped[float]
+    citacoes_total: Mapped[int] = mapped_column(Integer)
+    citacoes_verificadas: Mapped[int] = mapped_column(Integer)
+
+    licitacao: Mapped[Licitacao] = relationship()
