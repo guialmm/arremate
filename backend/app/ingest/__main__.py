@@ -3,6 +3,7 @@
     python -m app.ingest sync --dias 3          # publications of the last 3 days
     python -m app.ingest detalhes --limite 200  # items + document lists
     python -m app.ingest documentos <licitacao> # download and read one tender's editais
+    python -m app.ingest relevantes --perfil 1  # details + editais of the triaged-in tenders
     python -m app.ingest status
 """
 
@@ -23,7 +24,7 @@ from app.ingest.service import (
     ler_documento,
     sincronizar_dia,
 )
-from app.models import Documento, Licitacao, Pagina
+from app.models import Documento, Etapa, Licitacao, Pagina, Triagem
 from app.pncp.client import PncpClient
 
 
@@ -65,6 +66,30 @@ async def documentos(client: PncpClient, licitacao_id: str) -> None:
             print(f"{doc.tipo} '{doc.titulo}': {doc.status.value} {doc.total_paginas or ''} {doc.erro or ''}")
 
 
+async def relevantes(client: PncpClient, perfil_id: int) -> None:
+    """Only tenders that passed triage get their slow endpoints and editais fetched."""
+    async with SessionLocal() as session:
+        ids = (
+            await session.scalars(
+                select(Triagem.licitacao_id)
+                .where(Triagem.perfil_id == perfil_id, Triagem.relevante)
+                .order_by(Triagem.nota.desc())
+            )
+        ).all()
+    for lic_id in ids:
+        async with SessionLocal() as session:
+            lic = await session.get(Licitacao, lic_id)
+            if lic.detalhes != Etapa.ok and not await buscar_detalhes(session, client, lic):
+                print(f"{lic_id}: detalhes falharam ({lic.detalhes_erro})")
+                continue
+            for doc in (await session.scalars(documentos_a_ler(lic_id))).all():
+                await ler_documento(session, client, doc)
+                print(
+                    f"{lic_id} · {doc.tipo} '{doc.titulo[:40]}': {doc.status.value} "
+                    f"{doc.formato or ''} {doc.total_paginas or ''} {doc.erro or ''}"
+                )
+
+
 async def status() -> None:
     async with SessionLocal() as session:
         licitacoes = await session.execute(
@@ -85,6 +110,7 @@ async def main() -> None:
     sub.add_parser("sync").add_argument("--dias", type=int, default=2)
     sub.add_parser("detalhes").add_argument("--limite", type=int, default=100)
     sub.add_parser("documentos").add_argument("licitacao")
+    sub.add_parser("relevantes").add_argument("--perfil", type=int, default=1)
     sub.add_parser("status")
     args = parser.parse_args()
     logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
@@ -97,6 +123,8 @@ async def main() -> None:
             client = PncpClient(http)
             if args.comando == "sync":
                 await sync(client, args.dias)
+            elif args.comando == "relevantes":
+                await relevantes(client, args.perfil)
             elif args.comando == "detalhes":
                 await detalhes(client, args.limite)
             else:
