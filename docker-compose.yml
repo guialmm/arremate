@@ -1,0 +1,24 @@
+# Infra only (for local development with hot reload):
+#   docker compose up -d db redis
+# Ports are shifted (5433, 6380) so it runs next to other local Postgres/Redis.
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: arremate
+      POSTGRES_PASSWORD: arremate
+      POSTGRES_DB: arremate
+    ports: ["5433:5432"]
+    volumes: [pg_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arremate"]
+      interval: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6380:6379"]
+
+volumes:
+  pg_data:
