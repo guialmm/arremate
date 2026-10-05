@@ -51,6 +51,11 @@ class Risco(BaseModel):
 
 
 class Analise(BaseModel):
+    documentos_completos: bool = Field(
+        description="false quando os documentos não trazem as regras de habilitação e da "
+        "disputa: só planilha de preços, estudo técnico preliminar, ou termo de referência "
+        "sem o edital"
+    )
     resumo: str = Field(description="Duas ou três frases: o que se compra, para quem, como disputa")
     exclusiva_me_epp: Literal["sim", "nao", "parcial", "nao_informado"] = Field(
         description="sim: toda a licitação é exclusiva para ME/EPP; parcial: só alguns "

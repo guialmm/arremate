@@ -43,6 +43,9 @@ Regras:
 - Condições: prazo e local de entrega, amostras, garantia, pagamento, vigência da ata.
 - Riscos: o que desclassifica ou pune (amostra reprovada, multa, prazo curto, exigência
   incomum, marca específica). Gravidade alta para o que pode tirar a empresa da disputa.
+- Agências às vezes publicam só anexos no lugar do edital. Se faltam as regras de
+  habilitação e da disputa, marque documentos_completos = false, liste só o que existe e
+  recomende "avaliar", dizendo na justificativa que o edital precisa ser obtido.
 - Recomendação: "participar" se o objeto é do ramo e não falta documento; "avaliar" se há
   pendências contornáveis; "nao_participar" se falta algo que a empresa não consegue obter
   a tempo ou o objeto não é do ramo.

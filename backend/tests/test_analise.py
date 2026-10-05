@@ -17,6 +17,7 @@ def citacao(pagina, trecho):
 
 def analise_modelo(**override) -> dict:
     base = {
+        "documentos_completos": True,
         "resumo": "Compra de canetas.",
         "exclusiva_me_epp": "sim",
         "me_epp_citacao": citacao(1, "exclusiva para microempresas e empresas de pequeno porte"),
