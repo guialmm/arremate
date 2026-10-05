@@ -10,6 +10,7 @@ so callers can mark the work as failed and let the next run pick it up.
 import asyncio
 import random
 import re
+import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import date
@@ -21,6 +22,9 @@ from app.core.config import settings
 # The search endpoint rejects anything above 50.
 TAMANHO_PAGINA = 50
 RETRY_STATUS = {429, 500, 502, 503, 504}
+# PNCP blocks a client for ~15s after a burst and sends no Retry-After;
+# knocking again during the block only extends it.
+ESPERA_429 = 20.0
 
 
 class PncpErro(Exception):
@@ -48,6 +52,30 @@ class Download:
     nome_arquivo: str | None
 
 
+class Ritmo:
+    """Spaces request starts evenly. Shared by every call of a client, so
+    concurrent workers together stay under PNCP's per-minute limit."""
+
+    def __init__(
+        self,
+        por_minuto: float,
+        sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        clock: Callable[[], float] = time.monotonic,
+    ):
+        self.intervalo = 60 / por_minuto
+        self.sleep = sleep
+        self.clock = clock
+        self._proximo = 0.0
+        self._lock = asyncio.Lock()
+
+    async def aguardar(self) -> None:
+        async with self._lock:
+            espera = self._proximo - self.clock()
+            if espera > 0:
+                await self.sleep(espera)
+            self._proximo = max(self.clock(), self._proximo) + self.intervalo
+
+
 class PncpClient:
     def __init__(
         self,
@@ -57,8 +85,10 @@ class PncpClient:
         max_attempts: int = settings.pncp_max_attempts,
         base_delay: float = 2.0,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        ritmo: Ritmo | None = None,
     ):
         self.http = http
+        self.ritmo = ritmo or Ritmo(settings.pncp_requests_per_minute, sleep)
         self.base_url = base_url.rstrip("/")
         self.max_attempts = max_attempts
         self.base_delay = base_delay
@@ -75,6 +105,8 @@ class PncpClient:
     def _delay(self, attempt: int, response: httpx.Response | None) -> float:
         if response is not None and (after := response.headers.get("retry-after", "")).isdigit():
             return min(float(after), 120)
+        if response is not None and response.status_code == 429:
+            return ESPERA_429 + random.uniform(0, 5)
         # Exponential with full jitter, so parallel workers do not retry in lockstep.
         return random.uniform(0, min(self.base_delay * 2**attempt, 60))
 
@@ -83,6 +115,7 @@ class PncpClient:
         last = "sem resposta"
         for attempt in range(self.max_attempts):
             response = None
+            await self.ritmo.aguardar()
             try:
                 response = await self.http.get(url, params=params)
             except httpx.TransportError as exc:  # timeouts, resets, DNS
@@ -133,6 +166,7 @@ class PncpClient:
     async def baixar(self, url: str, limite_bytes: int) -> Download:
         """Download a document, refusing files above `limite_bytes` mid-stream."""
         for attempt in range(self.max_attempts):
+            await self.ritmo.aguardar()
             try:
                 async with self.http.stream("GET", url) as response:
                     if response.status_code in RETRY_STATUS:
@@ -151,10 +185,10 @@ class PncpClient:
                             raise ArquivoGrande(f"mais de {limite_bytes // 2**20} MB")
                         partes.append(parte)
                     return Download(b"".join(partes), _nome_arquivo(response))
-            except (httpx.TransportError, httpx.HTTPStatusError):
+            except (httpx.TransportError, httpx.HTTPStatusError) as exc:
                 if attempt + 1 == self.max_attempts:
                     raise PncpIndisponivel(f"download falhou {self.max_attempts}x: {url}")
-                await self.sleep(self._delay(attempt, None))
+                await self.sleep(self._delay(attempt, getattr(exc, "response", None)))
         raise AssertionError("unreachable")
 
 

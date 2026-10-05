@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     pncp_timeout_seconds: float = 60
     pncp_max_attempts: int = 5
     pncp_concurrency: int = 4
+    # Measured: ~22 requests in a burst trigger a 429; see app/pncp/client.py.
+    pncp_requests_per_minute: float = 20
     # Pregão eletrônico: the bulk of federal, state and municipal purchases.
     pncp_modalidades: list[int] = [6]
     # Editais above this are almost always scanned annexes or drawings.

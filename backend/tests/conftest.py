@@ -17,7 +17,7 @@ from sqlalchemy import text  # noqa: E402
 
 from app import models  # noqa: E402, F401
 from app.core.db import Base, SessionLocal, engine  # noqa: E402
-from app.pncp.client import PncpClient  # noqa: E402
+from app.pncp.client import PncpClient, Ritmo  # noqa: E402
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -102,7 +102,13 @@ async def client(pncp):
         sleeps.append(seconds)
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(pncp)) as http:
-        c = PncpClient(http, base_url="https://pncp.test/api", max_attempts=3, sleep=fake_sleep)
+        c = PncpClient(
+            http,
+            base_url="https://pncp.test/api",
+            max_attempts=3,
+            sleep=fake_sleep,
+            ritmo=Ritmo(por_minuto=10**9),  # pacing has its own tests
+        )
         c.sleeps = sleeps
         yield c
 

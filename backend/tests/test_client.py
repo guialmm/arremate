@@ -3,7 +3,7 @@ from datetime import date
 import httpx
 import pytest
 
-from app.pncp.client import ArquivoGrande, PncpErro, PncpIndisponivel
+from app.pncp.client import ESPERA_429, ArquivoGrande, PncpErro, PncpIndisponivel, Ritmo
 from tests.conftest import fixture
 
 BUSCA = "/consulta/v1/contratacoes/publicacao"
@@ -100,3 +100,28 @@ async def test_download_retries_server_errors(client, pncp):
     pncp.on("https://pncp.test/b", httpx.Response(503))
     with pytest.raises(PncpIndisponivel):
         await client.baixar("https://pncp.test/b", 1000)
+
+
+async def test_rate_limit_waits_longer_than_the_block(client, pncp):
+    # PNCP answers 429 with an HTML page and no Retry-After; the block lasts ~15s.
+    pncp.on(BUSCA, httpx.Response(429, text="<html>Limite excedido</html>"), httpx.Response(204))
+    await client.publicacoes(date(2026, 10, 1), 6, 1)
+    assert client.sleeps[0] >= ESPERA_429
+
+
+async def test_ritmo_spaces_requests_evenly():
+    agora = [100.0]
+    esperas: list[float] = []
+
+    async def sleep(segundos):
+        esperas.append(segundos)
+        agora[0] += segundos
+
+    ritmo = Ritmo(por_minuto=20, sleep=sleep, clock=lambda: agora[0])
+    for _ in range(4):
+        await ritmo.aguardar()
+    assert esperas == [3.0, 3.0, 3.0]  # first one goes straight through
+
+    agora[0] += 60  # idle for a minute: no debt carried over
+    await ritmo.aguardar()
+    assert len(esperas) == 3
