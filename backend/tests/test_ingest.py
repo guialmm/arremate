@@ -1,5 +1,5 @@
 import copy
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
 import httpx
 from sqlalchemy import func, select
@@ -139,6 +139,8 @@ async def test_details_failure_is_recorded_and_retried_later(session, client, pn
     assert not await buscar_detalhes(session, client, lic)
     assert lic.detalhes == Etapa.falhou and lic.detalhes_tentativas == 1
     assert "503" in lic.detalhes_erro
+    # The fixture's deadline is a real date that has passed; closed tenders are skipped.
+    lic.encerramento_propostas = datetime.now(timezone.utc) + timedelta(days=7)
     assert (await session.scalars(detalhes_pendentes(10))).all() == [lic]
 
 
