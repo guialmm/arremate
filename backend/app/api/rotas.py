@@ -1,23 +1,39 @@
+import re
+import unicodedata
+from datetime import UTC, datetime, time
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.agente.service import perguntar
+from app.analise.service import SemTexto
+from app.api.limite import Limite, ip
 from app.api.schemas import (
     AnaliseOut,
     LicitacaoDetalhe,
     LicitacaoResumo,
     PaginaOut,
     PerfilOut,
+    PerguntaIn,
+    RespostaOut,
     Triada,
 )
+from app.core.config import settings
 from app.core.db import get_session
-from app.models import AnaliseEdital, Documento, Licitacao, Pagina, Perfil, Triagem
+from app.llm import LLMErro, LLMIndisponivel, Mensagem, get_llm
+from app.models import AnaliseEdital, Documento, Licitacao, Pagina, Perfil, Pergunta, Triagem
 
 router = APIRouter(prefix="/api")
 Sessao = Annotated[AsyncSession, Depends(get_session)]
+limite_ip = Limite(settings.perguntas_por_ip, janela_s=600)
+
+
+def normalizar_pergunta(texto: str) -> str:
+    sem_acento = unicodedata.normalize("NFKD", texto.lower()).encode("ascii", "ignore").decode()
+    return " ".join(re.sub(r"[^\w\s]", " ", sem_acento).split())
 
 
 @router.get("/health")
@@ -65,6 +81,65 @@ async def triadas(
         )
         for t, a in linhas
     ]
+
+
+@router.post("/licitacoes/{licitacao_id:path}/perguntar", response_model=RespostaOut)
+async def perguntar_ao_edital(
+    licitacao_id: str, corpo: PerguntaIn, request: Request, session: Sessao, llm=Depends(get_llm)
+):
+    """Ask the agent about this tender. A first question already asked is answered from
+    the log; new ones are capped per IP and per day (the free LLM tier is small)."""
+    lic = await session.get(Licitacao, licitacao_id)
+    if lic is None:
+        raise HTTPException(404, "licitação não encontrada")
+    normalizada = normalizar_pergunta(corpo.pergunta)
+    if not corpo.historico:
+        guardada = await session.scalar(
+            select(Pergunta)
+            .where(
+                Pergunta.licitacao_id == lic.id,
+                Pergunta.pergunta_normalizada == normalizada,
+                Pergunta.com_historico.is_(False),
+            )
+            .order_by(Pergunta.id.desc())
+            .limit(1)
+        )
+        if guardada:
+            return RespostaOut(
+                resposta=guardada.resposta, citacoes=guardada.citacoes, ferramentas=guardada.ferramentas,
+                modelo=guardada.modelo, segundos=guardada.segundos, do_cache=True,
+            )
+
+    meia_noite = datetime.combine(datetime.now(UTC).date(), time.min, tzinfo=UTC)
+    hoje = await session.scalar(select(func.count()).select_from(Pergunta).where(Pergunta.created_at >= meia_noite))
+    if hoje >= settings.perguntas_por_dia:
+        raise HTTPException(429, "O limite diário de perguntas da demonstração acabou. Volte amanhã.")
+    if not limite_ip.permitir(ip(request)):
+        raise HTTPException(429, "Muitas perguntas seguidas. Espere alguns minutos.")
+
+    historico = [Mensagem(t.papel, t.texto) for t in corpo.historico]
+    try:
+        r = await perguntar(session, llm, lic, corpo.pergunta, historico)
+    except SemTexto:
+        raise HTTPException(409, "Os documentos desta licitação não puderam ser lidos.")
+    except LLMIndisponivel:
+        raise HTTPException(503, "O modelo gratuito está sobrecarregado agora. Tente em instantes.")
+    except LLMErro:
+        raise HTTPException(502, "O modelo não conseguiu responder. Tente reformular a pergunta.")
+
+    session.add(
+        Pergunta(
+            licitacao_id=lic.id, pergunta=corpo.pergunta, pergunta_normalizada=normalizada,
+            com_historico=bool(historico), resposta=r.resposta, citacoes=r.citacoes,
+            ferramentas=r.ferramentas, modelo=r.modelo, tokens_entrada=r.tokens_entrada,
+            tokens_saida=r.tokens_saida, segundos=r.segundos,
+        )
+    )
+    await session.commit()
+    return RespostaOut(
+        resposta=r.resposta, citacoes=r.citacoes, ferramentas=r.ferramentas,
+        modelo=r.modelo, segundos=r.segundos, do_cache=False,
+    )
 
 
 @router.get("/licitacoes/{licitacao_id:path}/analise", response_model=AnaliseOut)

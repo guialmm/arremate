@@ -244,3 +244,26 @@ class AnaliseEdital(TimestampMixin, Base):
     citacoes_verificadas: Mapped[int] = mapped_column(Integer)
 
     licitacao: Mapped[Licitacao] = relationship()
+
+
+class Pergunta(TimestampMixin, Base):
+    """A question asked to the agent about one tender, with its checked answer.
+
+    Doubles as a cache (the free LLM tier allows a few dozen calls a day) and as
+    the log the daily cap counts."""
+
+    __tablename__ = "perguntas"
+    __table_args__ = (Index("ix_perguntas_cache", "licitacao_id", "pergunta_normalizada"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    licitacao_id: Mapped[str] = mapped_column(ForeignKey("licitacoes.id", ondelete="CASCADE"))
+    pergunta: Mapped[str] = mapped_column(Text)
+    pergunta_normalizada: Mapped[str] = mapped_column(Text)
+    com_historico: Mapped[bool] = mapped_column(default=False)  # follow-ups are never served from cache
+    resposta: Mapped[str] = mapped_column(Text)
+    citacoes: Mapped[list] = mapped_column(JSONB)
+    ferramentas: Mapped[list] = mapped_column(JSONB)
+    modelo: Mapped[str] = mapped_column(String(60))
+    tokens_entrada: Mapped[int] = mapped_column(Integer)
+    tokens_saida: Mapped[int] = mapped_column(Integer)
+    segundos: Mapped[float]

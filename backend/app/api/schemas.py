@@ -1,9 +1,10 @@
-"""What the API returns. Read-only views over what ingestion, triage and analysis stored."""
+"""What the API takes and returns: views over what ingestion, triage and analysis stored."""
 
 from datetime import datetime
 from decimal import Decimal
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Modelo(BaseModel):
@@ -100,3 +101,22 @@ class PaginaOut(Modelo):
     arquivo: str | None
     pagina_no_arquivo: int
     texto: str
+
+
+class Turno(BaseModel):
+    papel: Literal["usuario", "assistente"]
+    texto: str = Field(max_length=4000)
+
+
+class PerguntaIn(BaseModel):
+    pergunta: str = Field(min_length=3, max_length=500)
+    historico: list[Turno] = Field(default_factory=list, max_length=6)
+
+
+class RespostaOut(BaseModel):
+    resposta: str
+    citacoes: list[dict]
+    ferramentas: list[dict]
+    modelo: str
+    segundos: float
+    do_cache: bool

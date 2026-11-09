@@ -1,5 +1,6 @@
 import httpx
 import pytest
+from sqlalchemy import func, select
 
 from app.main import app
 from app.models import AnaliseEdital, Documento, Pagina, StatusDocumento, Triagem
@@ -79,3 +80,75 @@ async def test_pagina_citada_e_404s(api, session):
     sem_analise = licitacao(4, "x").id
     r = await api.get(f"/api/licitacoes/{sem_analise}/analise", params={"perfil_id": p.id})
     assert r.status_code == 404
+
+
+# --- Perguntas ao agente ----------------------------------------------------
+
+from app.api import rotas  # noqa: E402
+from app.llm import get_llm  # noqa: E402
+from app.models import Pergunta  # noqa: E402
+from tests.test_agente import AgenteFalso, cenario as cenario_agente  # noqa: E402
+
+
+@pytest.fixture
+def agente(monkeypatch):
+    llm = AgenteFalso(
+        [("buscar_trechos", {"consulta": "amostra"})],
+        {"resposta": "Sim, em 3 dias úteis.", "citacoes": [{"pagina": 2, "trecho": "deverá apresentar amostra do item 4"}]},
+    )
+    llm.vezes = 0
+    original = llm.agente
+
+    async def contando(**kw):
+        llm.vezes += 1
+        return await original(**kw)
+
+    llm.agente = contando
+    app.dependency_overrides[get_llm] = lambda: llm
+    monkeypatch.setattr(rotas, "limite_ip", rotas.Limite(2, janela_s=600))
+    yield llm
+    app.dependency_overrides.clear()
+
+
+async def test_pergunta_responde_com_citacao_e_repetida_vem_do_cache(api, session, agente):
+    lic, *_ = await cenario_agente(session)
+    url = f"/api/licitacoes/{lic.id}/perguntar"
+    r = await api.post(url, json={"pergunta": "Precisa de amostra?"})
+    assert r.status_code == 200, r.text
+    corpo = r.json()
+    assert corpo["do_cache"] is False and corpo["citacoes"][0]["status"] == "verificada"
+
+    # Same question, different case and punctuation: no LLM call.
+    r = await api.post(url, json={"pergunta": "precisa de AMOSTRA"})
+    assert r.json()["do_cache"] is True and r.json()["resposta"] == "Sim, em 3 dias úteis."
+    assert agente.vezes == 1
+
+    # A follow-up depends on the conversation: always asks the model.
+    r = await api.post(url, json={"pergunta": "Precisa de amostra?", "historico": [{"papel": "usuario", "texto": "oi"}]})
+    assert r.json()["do_cache"] is False and agente.vezes == 2
+
+
+async def test_limites_por_ip_e_por_dia(api, session, agente, monkeypatch):
+    lic, *_ = await cenario_agente(session)
+    url = f"/api/licitacoes/{lic.id}/perguntar"
+    assert (await api.post(url, json={"pergunta": "pergunta um"})).status_code == 200
+    assert (await api.post(url, json={"pergunta": "pergunta dois"})).status_code == 200
+    r = await api.post(url, json={"pergunta": "pergunta três"})
+    assert r.status_code == 429 and "seguidas" in r.json()["detail"]
+    # Another visitor still gets through, until the daily cap.
+    outro = {"X-Forwarded-For": "200.1.1.1"}
+    monkeypatch.setattr(rotas.settings, "perguntas_por_dia", 2)
+    r = await api.post(url, json={"pergunta": "pergunta quatro"}, headers=outro)
+    assert r.status_code == 429 and "diário" in r.json()["detail"]
+    # Cached answers keep working after the cap.
+    assert (await api.post(url, json={"pergunta": "pergunta um"}, headers=outro)).json()["do_cache"] is True
+    assert await session.scalar(select(func.count()).select_from(Pergunta)) == 2
+
+
+async def test_pergunta_invalida_ou_sem_texto(api, session, agente):
+    lic, *_ = await cenario_agente(session)
+    assert (await api.post(f"/api/licitacoes/{lic.id}/perguntar", json={"pergunta": "?"})).status_code == 422
+    vazia = licitacao(9, "Sem documentos")
+    session.add(vazia)
+    await session.commit()
+    assert (await api.post(f"/api/licitacoes/{vazia.id}/perguntar", json={"pergunta": "Tem amostra?"})).status_code == 409
