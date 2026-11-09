@@ -28,7 +28,12 @@ class Settings(BaseSettings):
 
     # LLM (Gemini free tier; models tried in order when one is overloaded)
     gemini_api_key: str = ""
-    gemini_modelos: list[str] = ["gemini-3.7-flash", "gemini-flash-latest"]
+    # The lite model is the last resort: weaker, but almost never overloaded.
+    gemini_modelos: list[str] = ["gemini-3.7-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
+
+    # Public demo: each question costs 4-6 LLM calls of the free tier's few dozen a day.
+    perguntas_por_ip: int = 5  # per 10 minutes
+    perguntas_por_dia: int = 40  # new (uncached) questions, all visitors together
 
     @field_validator("database_url")
     @classmethod

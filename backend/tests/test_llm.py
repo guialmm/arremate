@@ -95,3 +95,19 @@ async def test_bad_request_is_not_retried():
 async def test_answer_outside_the_schema_is_an_error():
     with pytest.raises(LLMErro, match="fora do esquema"):
         await llm(FakeGenai(ok('{"nota": "alta"}'))).estruturado(sistema="s", conteudo="c", esquema=Nota)
+
+
+async def test_modelo_que_nao_responde_passa_para_o_proximo():
+    import asyncio
+
+    class Trava(FakeGenai):
+        async def _generate(self, *, model, contents, config):
+            self.models_called.append(model)
+            if model == "novo":
+                await asyncio.sleep(10)
+            return ok('{"nota": 5}')
+
+    fake = Trava()
+    g = GeminiLLM("k", ["novo", "estavel"], client=fake, timeout_s=0.05)
+    r = await g.estruturado(sistema="s", conteudo="c", esquema=Nota)
+    assert r.uso.modelo == "estavel" and fake.models_called == ["novo", "estavel"]

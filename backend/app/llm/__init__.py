@@ -1,10 +1,24 @@
 from app.core.config import settings
-from app.llm.base import LLM, LLMErro, LLMIndisponivel, Resposta, Uso
+from app.llm.base import (
+    LLM,
+    AgenteLLM,
+    Chamada,
+    Ferramenta,
+    LLMErro,
+    LLMIndisponivel,
+    Mensagem,
+    Resposta,
+    RespostaAgente,
+    Uso,
+)
 
-__all__ = ["LLM", "LLMErro", "LLMIndisponivel", "Resposta", "Uso", "get_llm"]
+__all__ = [
+    "LLM", "AgenteLLM", "Chamada", "Ferramenta", "LLMErro", "LLMIndisponivel", "Mensagem",
+    "Resposta", "RespostaAgente", "Uso", "get_llm",
+]
 
 
-def get_llm() -> LLM:
+def get_llm():  # GeminiLLM: implements both LLM and AgenteLLM
     from app.llm.gemini import GeminiLLM
 
     if not settings.gemini_api_key:
