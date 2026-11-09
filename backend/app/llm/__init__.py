@@ -19,8 +19,8 @@ __all__ = [
 
 
 def get_llm():  # GeminiLLM: implements both LLM and AgenteLLM
-    from app.llm.gemini import GeminiLLM
+    from app.llm.gemini import FORA_DE_USO, GeminiLLM
 
     if not settings.gemini_api_key:
         raise RuntimeError("GEMINI_API_KEY ausente no .env")
-    return GeminiLLM(settings.gemini_api_key, settings.gemini_modelos)
+    return GeminiLLM(settings.gemini_api_key, settings.gemini_modelos, fora_de_uso=FORA_DE_USO)

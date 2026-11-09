@@ -111,3 +111,14 @@ async def test_modelo_que_nao_responde_passa_para_o_proximo():
     g = GeminiLLM("k", ["novo", "estavel"], client=fake, timeout_s=0.05)
     r = await g.estruturado(sistema="s", conteudo="c", esquema=Nota)
     assert r.uso.modelo == "estavel" and fake.models_called == ["novo", "estavel"]
+
+
+async def test_modelo_que_falhou_fica_de_fora_por_um_tempo():
+    agora = [0.0]
+    fake = FakeGenai(erro(503), ok('{"nota": 1}'), ok('{"nota": 2}'), ok('{"nota": 3}'))
+    g = GeminiLLM("k", ["novo", "estavel"], client=fake, relogio=lambda: agora[0])
+    await g.estruturado(sistema="s", conteudo="c", esquema=Nota)
+    await g.estruturado(sistema="s", conteudo="c", esquema=Nota)  # "novo" skipped: still cooling
+    agora[0] = 301
+    await g.estruturado(sistema="s", conteudo="c", esquema=Nota)  # back in line
+    assert fake.models_called == ["novo", "estavel", "estavel", "novo"]
