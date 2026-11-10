@@ -44,7 +44,7 @@ class GeminiLLM:
         # Free-tier models sometimes accept a request and never answer: give up and
         # fall through to the next model instead of hanging. A 70k-token edital takes ~1 min.
         timeout_s: float = 150,
-        timeout_agente_s: float = 40,  # agent turns are short prompts
+        timeout_agente_s: float = 60,  # agent turns: a few pages of context at most
         fora_de_uso: dict[str, float] | None = None,
         client: genai.Client | None = None,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
@@ -127,7 +127,7 @@ class GeminiLLM:
         ferramentas: list[Ferramenta],
         executar: Executor,
         final: str,
-        max_passos: int = 8,
+        max_passos: int = 10,
     ) -> RespostaAgente:
         config = types.GenerateContentConfig(
             system_instruction=sistema,
@@ -156,8 +156,19 @@ class GeminiLLM:
         entrada = saida = 0
         modelo = self.modelos[0]
         inicio = self.relogio()
-        for _ in range(max_passos):
-            r, modelo, _ = await self._gerar(contents, config, self.timeout_agente_s, espera_base=5)
+        # Last step: only the closing tool is allowed, so the model answers with what it read.
+        so_final = config.model_copy(
+            update={
+                "tool_config": types.ToolConfig(
+                    function_calling_config=types.FunctionCallingConfig(
+                        mode=types.FunctionCallingConfigMode.ANY, allowed_function_names=[final]
+                    )
+                )
+            }
+        )
+        for passo in range(max_passos):
+            atual = so_final if passo == max_passos - 1 else config
+            r, modelo, _ = await self._gerar(contents, atual, self.timeout_agente_s, espera_base=5)
             if u := r.usage_metadata:
                 entrada += u.prompt_token_count or 0
                 saida += (u.candidates_token_count or 0) + (u.thoughts_token_count or 0)

@@ -121,6 +121,7 @@ class GenaiRoteiro:
 
     async def _gerar(self, *, model, contents, config):
         self.contents.append(list(contents))
+        self.configs = [*getattr(self, "configs", []), config]
         r = self.respostas.pop(0)
         if isinstance(r, Exception):
             raise r
@@ -164,3 +165,6 @@ async def test_laco_do_gemini_desiste_depois_de_max_passos():
     with pytest.raises(LLMErro):
         await g.agente(sistema="s", mensagens=[Mensagem("usuario", "?")], ferramentas=[], executar=executar,
                        final="responder", max_passos=3)
+    # Only the last step is restricted to the closing tool.
+    permitidas = [c.tool_config.function_calling_config.allowed_function_names for c in fake.configs]
+    assert permitidas == [None, None, ["responder"]]

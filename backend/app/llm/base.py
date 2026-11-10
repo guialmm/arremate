@@ -83,7 +83,7 @@ class AgenteLLM(Protocol):
         ferramentas: list[Ferramenta],
         executar: Executor,
         final: str,
-        max_passos: int = 8,
+        max_passos: int = 10,
     ) -> RespostaAgente:
         """Let the model call tools until it calls `final`, whose arguments are the answer.
         `executar` must never raise: errors go back to the model as {"erro": ...}."""
