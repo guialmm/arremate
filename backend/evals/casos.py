@@ -36,9 +36,11 @@ CASOS = [
          [r"sediad|local|munic[ií]pio de marilena", r"n[ãa]o|apenas|somente|exclusiv|restrit"], {12, 14}),
     Caso("pagamento_encruzilhada", ENCRUZILHADA, "Como é feito o pagamento?",
          [r"empenho|nota fiscal"], {18}),
-    # The contract template has the delivery period left blank ("...... dias").
-    Caso("entrega_em_branco_encruzilhada", ENCRUZILHADA,
-         "Qual é o prazo de entrega, em dias, depois do empenho?", [NAO_INFORMA], {93}),
+    # The contract template (p. 93) leaves the period blank ("...... dias"), but the edital
+    # itself sets it on p. 17. The first version of this case expected "not informed":
+    # the agent found p. 17 and the eval was the one that was wrong.
+    Caso("entrega_encruzilhada", ENCRUZILHADA,
+         "Qual é o prazo de entrega, em dias, depois do empenho?", [r"\b15\b|quinze", r"corridos"], {17}),
     Caso("amostra_palhoca", PALHOCA, "É preciso apresentar amostra? Em quanto tempo?",
          [r"\b0?3\b|tr[êe]s", r"[úu]teis"], {17}),
     Caso("entrega_palhoca", PALHOCA, "Qual o prazo de entrega depois da ordem de compra?",

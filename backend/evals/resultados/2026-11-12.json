@@ -1,0 +1,534 @@
+[
+  {
+    "caso": "garantia_marilena",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 19,
+        "trecho": "O prazo de garantia do(s) produto(s) licitado é de no mínimo 12 (doze) meses, a contar da data de entrega do(s) mesmo(s).",
+        "status": "verificada",
+        "documento_id": 18,
+        "documento": "Edital: 8---EDITAL-DE-PREGAO-ELETRONICO-N_-021-2026-...",
+        "pagina_documento": 8,
+        "arquivo": null,
+        "pagina_no_arquivo": 8
+      },
+      {
+        "pagina": 63,
+        "trecho": "O objeto deste contrato possui garantia pelo período de 12 meses, a contar de seu recebimento definitivo, conforme disposto no termo de referência/edital.",
+        "status": "verificada",
+        "documento_id": 18,
+        "documento": "Edital: 8---EDITAL-DE-PREGAO-ELETRONICO-N_-021-2026-...",
+        "pagina_documento": 52,
+        "arquivo": null,
+        "pagina_no_arquivo": 52
+      }
+    ],
+    "verificadas": 2,
+    "inventadas": 0,
+    "passos": 4,
+    "segundos": 426.3,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Qual é o prazo de garantia exigido para os produtos?",
+    "resposta": "O prazo de garantia exigido para os produtos é de no mínimo 12 (doze) meses, contados a partir da data de entrega (ou do recebimento definitivo). \n\nCaso a garantia oferecida pelo fabricante seja inferior a esse período, o licitante deverá complementar a garantia do bem ofertado pelo período restante.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "garantia"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "prazo de garantia"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 19
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 63
+        }
+      }
+    ]
+  },
+  {
+    "caso": "pagamento_marilena",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 61,
+        "trecho": "6. CLÁUSULA SEXTA – DO PAGAMENTO. 6.1. O pagamento será efetuado em até 30 (trinta) dias, em moeda brasileira corrente, após a entrega do bem, aprovação do fiscal e mediante a apresentação da nota fiscal ou fatura.",
+        "status": "verificada",
+        "documento_id": 18,
+        "documento": "Edital: 8---EDITAL-DE-PREGAO-ELETRONICO-N_-021-2026-...",
+        "pagina_documento": 50,
+        "arquivo": null,
+        "pagina_no_arquivo": 50
+      }
+    ],
+    "verificadas": 1,
+    "inventadas": 0,
+    "passos": 2,
+    "segundos": 135.7,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Em quantos dias a prefeitura paga depois da entrega?",
+    "resposta": "O pagamento será efetuado em até 30 (trinta) dias após a entrega do bem, mediante a aprovação do fiscal e a apresentação da nota fiscal ou fatura.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "pagamento prazo apos entrega nota fiscal"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 61
+        }
+      }
+    ]
+  },
+  {
+    "caso": "empresa_local_marilena",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 12,
+        "trecho": "PREFERÊNCIA ME/EPP/EQUIPARADAS: A participação neste pregão será para empresas que estão sediadas no Município de Marilena -PR, com base no Decreto Municipal n° 244/2026 -,Capitulo I Art. 2º, inciso I...",
+        "status": "verificada",
+        "documento_id": 18,
+        "documento": "Edital: 8---EDITAL-DE-PREGAO-ELETRONICO-N_-021-2026-...",
+        "pagina_documento": 1,
+        "arquivo": null,
+        "pagina_no_arquivo": 1
+      }
+    ],
+    "verificadas": 1,
+    "inventadas": 0,
+    "passos": 3,
+    "segundos": 125.0,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Uma empresa de Curitiba pode participar deste pregão?",
+    "resposta": "Não, uma empresa de Curitiba não pode participar deste pregão. O edital estabelece restrição geográfica de participação, limitando-a exclusivamente a empresas sediadas no Município de Marilena - PR.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "Curitiba participacao sede estrangeira outras localidades regiao"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "participar da licitação ME EPP exclusivas Marilena empresas da cidade"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 12
+        }
+      }
+    ]
+  },
+  {
+    "caso": "pagamento_encruzilhada",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 18,
+        "trecho": "22.1. O pagamento será efetuado contra empenho, após o recebimento do objeto, e mediante apresentação da Nota Fiscal/Fatura.",
+        "status": "verificada",
+        "documento_id": 78,
+        "documento": "Edital: Processo 14602026  Pregao Eletronico 662026",
+        "pagina_documento": 18,
+        "arquivo": null,
+        "pagina_no_arquivo": 18
+      },
+      {
+        "pagina": 18,
+        "trecho": "22.3. O pagamento será efetuado em até 20 (vinte) dias, após o envio da Nota Fiscal e entrega do(s) produto(s) e/ou serviços.",
+        "status": "verificada",
+        "documento_id": 78,
+        "documento": "Edital: Processo 14602026  Pregao Eletronico 662026",
+        "pagina_documento": 18,
+        "arquivo": null,
+        "pagina_no_arquivo": 18
+      },
+      {
+        "pagina": 94,
+        "trecho": "Subcláusula Segunda: O pagamento será através de depósito bancário na Conta Corrente da empresa DETENTORA da Ata.",
+        "status": "verificada",
+        "documento_id": 78,
+        "documento": "Edital: Processo 14602026  Pregao Eletronico 662026",
+        "pagina_documento": 94,
+        "arquivo": null,
+        "pagina_no_arquivo": 94
+      }
+    ],
+    "verificadas": 3,
+    "inventadas": 0,
+    "passos": 3,
+    "segundos": 175.9,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Como é feito o pagamento?",
+    "resposta": "O pagamento será efetuado em até 20 (vinte) dias após o envio da Nota Fiscal e a entrega dos produtos, contra empenho e mediante a apresentação da Nota Fiscal/Fatura devidamente atestada pelo responsável da secretaria de origem. O repasse será realizado por meio de depósito bancário na conta corrente da empresa detentora da ata.\n\nCaso ocorra atraso no pagamento, os valores serão corrigidos monetariamente pelo índice IPCA do período ou outro índice que venha a substituí-lo.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "pagamento"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 18
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 94
+        }
+      }
+    ]
+  },
+  {
+    "caso": "entrega_encruzilhada",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 17,
+        "trecho": "...o fornecedor deverá entregar os produtos no Almoxarifado da Prefeitura, sito à rua Honório Florisbal, 310 no prazo de até (quinze) dias corridos, a partir da data da confirmação de recebimento de empenho por parte da fornecedora.",
+        "status": "verificada",
+        "documento_id": 78,
+        "documento": "Edital: Processo 14602026  Pregao Eletronico 662026",
+        "pagina_documento": 17,
+        "arquivo": null,
+        "pagina_no_arquivo": 17
+      }
+    ],
+    "verificadas": 1,
+    "inventadas": 0,
+    "passos": 2,
+    "segundos": 14.3,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Qual é o prazo de entrega, em dias, depois do empenho?",
+    "resposta": "O prazo de entrega dos produtos é de até 15 (quinze) dias corridos, contados a partir da data de confirmação de recebimento do empenho pela fornecedora. A entrega deve ser realizada em dias úteis, das 8:00 às 12:00 e das 13:30 às 17:00 horas, no Almoxarifado da Prefeitura.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "prazo de entrega empenho"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 17
+        }
+      }
+    ]
+  },
+  {
+    "caso": "amostra_palhoca",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 17,
+        "trecho": "Caso a compatibilidade com as especificações demandadas, sobretudo quanto a padrões de qualidade e desempenho, não possa ser aferida pelos meios previstos nos subitens acima, o Pregoeiro exigirá que o licitante classificado em primeiro lugar apresente amostra, sob pena de não aceitação da proposta, no local a ser indicado e dentro de 03 (TRÊS) dias úteis contados da solicitação.",
+        "status": "verificada",
+        "documento_id": 89,
+        "documento": "Edital: 245-2026-PMP PE RP Papel A4 SMA.pdf",
+        "pagina_documento": 17,
+        "arquivo": null,
+        "pagina_no_arquivo": 17
+      }
+    ],
+    "verificadas": 1,
+    "inventadas": 0,
+    "passos": 3,
+    "segundos": 21.5,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "É preciso apresentar amostra? Em quanto tempo?",
+    "resposta": "Sim, a apresentação de amostra é exigida caso a compatibilidade e a qualidade do produto não possam ser aferidas por outros meios. O licitante classificado em primeiro lugar deve entregá-la no prazo de 3 (três) dias úteis contados da solicitação, no local indicado pelo Pregoeiro.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "amostra"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 17
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 18
+        }
+      }
+    ]
+  },
+  {
+    "caso": "entrega_palhoca",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 42,
+        "trecho": "8.1.2 O prazo de entrega dos itens será de 5 (cinco) dias, a contar da data do recebimento da ordem de compra, pela Contratada, podendo este ser prorrogado a critério da Contratante, caso seja",
+        "status": "verificada",
+        "documento_id": 94,
+        "documento": "Termo de Referência: TR_PAPEL_A4_1.pdf",
+        "pagina_documento": 6,
+        "arquivo": null,
+        "pagina_no_arquivo": 6
+      }
+    ],
+    "verificadas": 1,
+    "inventadas": 0,
+    "passos": 3,
+    "segundos": 23.1,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Qual o prazo de entrega depois da ordem de compra?",
+    "resposta": "O prazo de entrega dos itens é de 5 (cinco) dias, a contar da data do recebimento da ordem de compra pela Contratada, podendo ser prorrogado a critério da Contratante mediante apresentação de justificativa.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "prazo entrega ordem compra fornecimento"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 42
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 43
+        }
+      }
+    ]
+  },
+  {
+    "caso": "substituicao_palhoca",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 45,
+        "trecho": "Os materiais entregues em desacordo como especificado neste instrumento convocatório, na proposta do adjudicatário e/ou na amostra será rejeitado, parcialmente ou totalmente, conforme o caso, obrigando-se a Contratada a substituí-los no prazo máximo de 48 (quarenta e oito) horas após o recebimento da comunicação oficial feita pela Secretaria solicitante...",
+        "status": "verificada",
+        "documento_id": 94,
+        "documento": "Termo de Referência: TR_PAPEL_A4_1.pdf",
+        "pagina_documento": 9,
+        "arquivo": null,
+        "pagina_no_arquivo": 9
+      }
+    ],
+    "verificadas": 1,
+    "inventadas": 0,
+    "passos": 3,
+    "segundos": 24.9,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Se um material for rejeitado, em quanto tempo precisa ser substituído?",
+    "resposta": "Se um material for rejeitado por estar em desacordo com o edital, proposta ou amostra, a contratada deve substituí-lo no prazo máximo de 48 horas após receber a comunicação oficial da Secretaria solicitante. Caso não o faça, a empresa será considerada em atraso na entrega e estará sujeita às sanções previstas.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "rejeitado substituído prazo troca"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "substituição recusado rejeitado troca defeito"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 45
+        }
+      }
+    ]
+  },
+  {
+    "caso": "entrega_caxias",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [
+      {
+        "pagina": 16,
+        "trecho": "O prazo de entrega do objeto não poderá ser superior a 10 (dez) dias consecutivos, contados após a data de recebimento da nota de empenho.",
+        "status": "verificada",
+        "documento_id": 81,
+        "documento": "Edital: PESRP256-26.zip",
+        "pagina_documento": 16,
+        "arquivo": "ETP E ANEXOS.pdf",
+        "pagina_no_arquivo": 2
+      }
+    ],
+    "verificadas": 1,
+    "inventadas": 0,
+    "passos": 2,
+    "segundos": 15.5,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Qual o prazo máximo de entrega?",
+    "resposta": "O prazo máximo de entrega do objeto é de 10 (dez) dias consecutivos, contados a partir da data de recebimento da nota de empenho.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "prazo de entrega"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 16
+        }
+      }
+    ]
+  },
+  {
+    "caso": "canetas_palhoca",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [],
+    "verificadas": 0,
+    "inventadas": 0,
+    "passos": 6,
+    "segundos": 70.0,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Qual a cor de tinta exigida para as canetas?",
+    "resposta": "Os documentos da licitação não mencionam exigência de canetas, pois o objeto do certame é exclusivamente a aquisição de papel A4.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "caneta cor tinta"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "caneta"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "material de expediente"
+        }
+      },
+      {
+        "nome": "listar_itens",
+        "argumentos": {}
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "escrever"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "lápis"
+        }
+      }
+    ]
+  },
+  {
+    "caso": "visita_caxias",
+    "acertou": true,
+    "citou_a_pagina": true,
+    "citacoes": [],
+    "verificadas": 0,
+    "inventadas": 0,
+    "passos": 9,
+    "segundos": 63.2,
+    "modelo": "gemini-flash-lite-latest",
+    "pergunta": "Qual o endereço e o horário da visita técnica obrigatória?",
+    "resposta": "Os documentos da licitação não informam sobre a exigência de visita técnica, nem trazem endereço ou horário para essa finalidade.",
+    "ferramentas": [
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "visita técnica"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "visita"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "vistoria"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "amostra"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "endereço"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "obrigatória"
+        }
+      },
+      {
+        "nome": "buscar_trechos",
+        "argumentos": {
+          "consulta": "condição"
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 1
+        }
+      },
+      {
+        "nome": "ler_pagina",
+        "argumentos": {
+          "pagina": 2
+        }
+      }
+    ]
+  }
+]
