@@ -4,6 +4,7 @@ import random
 import time
 from collections.abc import Awaitable, Callable
 
+import httpx
 from google import genai
 from google.genai import errors, types
 from pydantic import ValidationError
@@ -82,6 +83,8 @@ class GeminiLLM:
                     return r, modelo, self.relogio() - inicio
                 except TimeoutError:
                     ultimo = f"{modelo}: sem resposta em {timeout_s:.0f}s"
+                except httpx.TransportError as exc:  # connection dropped or refused mid-call
+                    ultimo = f"{modelo}: rede ({type(exc).__name__})"
                 except errors.APIError as exc:
                     if exc.code not in TRANSITORIOS and exc.code != 404:  # 404: model retired
                         raise LLMErro(f"{modelo}: {exc.code} {exc.message}") from exc

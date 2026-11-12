@@ -122,3 +122,12 @@ async def test_modelo_que_falhou_fica_de_fora_por_um_tempo():
     agora[0] = 301
     await g.estruturado(sistema="s", conteudo="c", esquema=Nota)  # back in line
     assert fake.models_called == ["novo", "estavel", "estavel", "novo"]
+
+
+async def test_conexao_que_cai_passa_para_o_proximo_modelo():
+    import httpx
+
+    fake = FakeGenai(httpx.ReadError("conexão caiu"), ok('{"nota": 7}'))
+    g = GeminiLLM("k", ["novo", "estavel"], client=fake)
+    r = await g.estruturado(sistema="s", conteudo="c", esquema=Nota)
+    assert r.uso.modelo == "estavel" and r.dados.nota == 7
