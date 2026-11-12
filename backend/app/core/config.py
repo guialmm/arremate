@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     # The lite model is the last resort: weaker, but almost never overloaded.
     gemini_modelos: list[str] = ["gemini-3.7-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
 
+    # Origins allowed to call the API from the browser (the chat calls it directly: an agent
+    # answer can take a minute, longer than a proxy rewrite waits).
+    cors_origens: list[str] = ["http://localhost:3002"]
+
     # Public demo: each question costs 4-6 LLM calls of the free tier's few dozen a day.
     perguntas_por_ip: int = 5  # per 10 minutes
     perguntas_por_dia: int = 40  # new (uncached) questions, all visitors together

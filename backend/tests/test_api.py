@@ -152,3 +152,11 @@ async def test_pergunta_invalida_ou_sem_texto(api, session, agente):
     session.add(vazia)
     await session.commit()
     assert (await api.post(f"/api/licitacoes/{vazia.id}/perguntar", json={"pergunta": "Tem amostra?"})).status_code == 409
+
+
+async def test_cors_so_para_o_site(api):
+    pre = {"Access-Control-Request-Method": "POST", "Access-Control-Request-Headers": "content-type"}
+    ok = await api.options("/api/health", headers={"Origin": "http://localhost:3002", **pre})
+    assert ok.headers.get("access-control-allow-origin") == "http://localhost:3002"
+    outro = await api.options("/api/health", headers={"Origin": "https://malicioso.example", **pre})
+    assert "access-control-allow-origin" not in outro.headers

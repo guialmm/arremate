@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  /* Official paper: an edital printed on letterhead, petrol ink, a red stamp for risk. */
+  --color-papel: #f6f4ee;
+  --color-folha: #fffdf8;
+  --color-tinta: #1f3a4a;
+  --color-apagado: #6b7a82;
+  --color-linha: #ddd8cc;
+  --color-carimbo: #b3261e;
+  --color-carimbo-suave: #fbeeec;
+  --color-ok: #2f6b4f;
+  --color-atencao: #9a6a12;
+  --color-marca-texto: #fde58a;
+
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+}
+
+body {
+  background: var(--color-papel);
+  color: var(--color-tinta);
+  font-family: var(--font-sans);
+}
+
+/* The citation the reader clicked, marked like a highlighter on paper. */
+mark {
+  background: var(--color-marca-texto);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+@keyframes surgir {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.surgir { animation: surgir 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
